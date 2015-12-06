@@ -1,4 +1,4 @@
-# Steve Initialize.ck #
+# Steve Package Folder #
 A wrapper for performing actions on the package folder in [`steve`](https://www.github.com/brycekbargar/steve) packages.
 
 ### Usage ###
