@@ -1,0 +1,32 @@
+rules:
+  indent:
+    - 2
+    - 2
+  quotes:
+    - 2
+    - single
+  linebreak-style:
+    - 2
+    - unix
+  semi:
+    - 2
+    - always
+  no-var:
+    - 2
+  no-console:
+    - 0
+ecmaFeatures:
+  arrowFunctions:
+    - 2
+  modules:
+    - 2
+  blockBindings:
+    - 2
+  templateStrings:
+    - 2
+  classes:
+    - 2
+env:
+  node: true
+  mocha: true
+extends: 'eslint:recommended'
