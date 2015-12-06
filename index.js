@@ -1,5 +1,9 @@
 module.exports = function(folderPath, cb) {
-  require('fs').lstat(folderPath, (err) => {
-    cb(err);
+  require('fs').mkdir(folderPath, (err) => {
+    if(err && err.code !== 'EEXIST') {
+      cb(err);
+      return;
+    }
+    cb(null);
   });
 };
