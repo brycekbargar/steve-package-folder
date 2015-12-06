@@ -24,19 +24,30 @@ describe('when loading the folder', () => {
     expect(this.mkdirStub).to.have.been.calledWith(folderPath);
   });
   describe('and it fails', () => {
+    beforeEach('Setup Spies', () => {
+      this.error = {};
+      this.mkdirStub.callsArgWith(1, this.error);
+    });
     it('expect no error if it exists', () => {
-      let error = { code: 'EEXIST' };
-      this.mkdirStub.callsArgWith(1, error);
+      this.error.code = 'EEXIST';
       this.folder(_, this.callbackSpy);
       expect(this.callbackSpy).to.have.been.calledOnce;
       expect(this.callbackSpy).to.have.been.calledWith(null);
     });
     it('expect an error for any other failure', () => {
-      let error = new Error();
-      this.mkdirStub.callsArgWith(1, error);
       this.folder(_, this.callbackSpy);
       expect(this.callbackSpy).to.have.been.calledOnce;
-      expect(this.callbackSpy).to.have.been.calledWith(error);
+      expect(this.callbackSpy).to.have.been.calledWith(this.error);
+    });
+  });
+  describe('and it succeeds', () => {
+    beforeEach('Setup Spies', () => {
+      this.mkdirStub.callsArgWith(1, null);
+    });
+    it('expect no error', () => {
+      this.folder(_, this.callbackSpy);
+      expect(this.callbackSpy).to.have.been.calledOnce;
+      expect(this.callbackSpy).to.have.been.calledWith(null);
     });
   });
 });
