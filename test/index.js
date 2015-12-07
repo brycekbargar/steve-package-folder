@@ -2,33 +2,39 @@
 
 const proxyquire = require('proxyquire').noCallThru();
 const sinon = require('sinon');
-require('sinon-as-promised')(require('bluebird'));
+const Promise = require('bluebird');
+require('sinon-as-promised')(Promise);
 const stub = sinon.stub;
 const expect = require('chai')
   .use(require('sinon-chai'))
   .use(require('chai-as-promised'))
   .expect;
 
-const proxyquireStubs = { fs: { stat: 'stat' } };
+const proxyquireStubs = {
+  bluebird: Promise,
+  fs: {
+    stat: 'stat',
+    rmdir:  'rmdir'
+  }
+};
 
 const _ = 'A SUPER COOL FOLDER';
 
 describe('For the Steve Package Folder', () => {
   beforeEach('Setup Spies', () => {
-    this.promisifyStub = stub();
-    proxyquireStubs['bluebird'] = { promisify: this.promisifyStub };
+    this.promisifyStub = stub(Promise, 'promisify');
+    this.promisifyStub.withArgs('stat').returns(this.statStub = stub());
+    this.promisifyStub.withArgs('rmdir').returns(this.rmdirStub = stub());
+    this.statStub.resolves({ isDirectory : (this.isDirectoryStub = stub()) });
+  });
+  afterEach('Teardown Spies', () => {
+    this.promisifyStub.restore();
   });
   beforeEach('Setup Package Folder', () => {
     let PackageFolder = proxyquire('./../index.js', proxyquireStubs);
     this.packageFolder = new PackageFolder(_);
   });
   describe('when #isValid() is called', () => {
-    beforeEach('Setup Spies', () => {
-      this.statStub = stub();
-      this.isDirectoryStub = stub();
-      this.statStub.resolves({ isDirectory : this.isDirectoryStub });
-      this.promisifyStub.withArgs('stat').returns(this.statStub);
-    });
     it('expect the constructor folder to be tested', () => {
       this.packageFolder.isValid();
       expect(this.statStub).to.have.been.calledOnce;
@@ -57,6 +63,26 @@ describe('For the Steve Package Folder', () => {
         this.isDirectoryStub.returns(false);
         let isValid = this.packageFolder.isValid();
         expect(isValid).to.eventually.not.be.ok;
+      });
+    });
+  });
+  describe('when #clear() is called', () => {
+    it('expect it to be deleted', () => {
+      this.rmdirStub.resolves();
+      let clear = this.packageFolder.clear();
+      expect(clear).to.be.fulfilled;
+    });
+    describe('and deletion fails', () => {
+      it('expect nothing if it doesn\'t exist', () => {
+        this.rmdirStub.rejects({ code: 'ENOENT' });
+        let clear = this.packageFolder.clear();
+        expect(clear).to.be.fulfilled;
+      });
+      it('expect any other error to be returned', () =>{
+        let error = new Error();
+        this.rmdirStub.rejects(error);
+        let clear = this.packageFolder.clear();
+        expect(clear).to.be.rejectedWith(error);
       });
     });
   });
