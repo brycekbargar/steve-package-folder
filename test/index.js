@@ -25,23 +25,39 @@ describe('For the Steve Package Folder', () => {
   describe('when #isValid() is called', () => {
     beforeEach('Setup Spies', () => {
       this.statStub = stub();
-      this.statStub.resolves();
+      this.isDirectoryStub = stub();
+      this.statStub.resolves({ isDirectory : this.isDirectoryStub });
       this.promisifyStub.withArgs('stat').returns(this.statStub);
     });
-    it('expect the constructor folder to be passed', () => {
+    it('expect the constructor folder to be tested', () => {
       this.packageFolder.isValid();
       expect(this.statStub).to.have.been.calledOnce;
       expect(this.statStub).to.have.been.calledWith(_);
     });
-    it('and the folder is missing expect it to be ok', () => {
-      this.statStub.rejects({ code: 'EEXIST' });
-      let isValid = this.packageFolder.isValid();
-      expect(isValid).to.eventually.be.ok;
+    describe('expect it to be valid if', () => {
+      it('the folder is missing', () => {
+        this.statStub.rejects({ code: 'ENOENT' });
+        let isValid = this.packageFolder.isValid();
+        expect(isValid).to.eventually.be.ok;
+      });
+      // I'm not testing the mode because that seems hard
+      it('it is a folder', () => {
+        this.isDirectoryStub.returns(true);
+        let isValid = this.packageFolder.isValid();
+        expect(isValid).to.eventually.be.ok;
+      });
     });
-    it('and it fails for any other reason expect it to not be ok', () => {
-      this.statStub.rejects(new Error());
-      let isValid = this.packageFolder.isValid();
-      expect(isValid).to.eventually.not.be.ok;
+    describe('expect it to not be valid if', () => {
+      it('it fails for any other reason', () => {
+        this.statStub.rejects(new Error());
+        let isValid = this.packageFolder.isValid();
+        expect(isValid).to.eventually.not.be.ok;
+      });
+      it('it is not a folder', () => {
+        this.isDirectoryStub.returns(false);
+        let isValid = this.packageFolder.isValid();
+        expect(isValid).to.eventually.not.be.ok;
+      });
     });
   });
 });

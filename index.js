@@ -3,7 +3,7 @@
 const Promise = require('bluebird');
 const fs = require('fs');
 
-module.exports = class PackageFolder {
+class PackageFolder {
   constructor(folderPath) {
     this.folderPath = folderPath;
   }
@@ -11,6 +11,9 @@ module.exports = class PackageFolder {
   isValid() {
     return Promise
       .promisify(fs.stat)(this.folderPath)
-      .catch((err) =>  err.code === 'EEXIST');
+      .then(s => s.isDirectory())
+      .catch(err =>  err.code === 'ENOENT');
   }
-};
+}
+
+module.exports = PackageFolder;
