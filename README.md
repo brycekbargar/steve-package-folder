@@ -2,37 +2,37 @@
 A wrapper for performing actions on the package folder in [`steve`](https://www.github.com/brycekbargar/steve) packages.
 
 ### Usage ###
-Right now the package is a single function that has two parameters
+Requiring this package returns a `PackageFolder` class. The class has the following methods:
 
-1. The absolute path the folder
-1. A callback for when the function is loaded.
+##### `.constructor()` #####
+Takes a single string containing the absolute folder path
 
-The callback should take two parameters
-
-1. Any `Error` that ocurred while loading the file. This will be null if there are no errors.
-1. An object with two functions
-  - `clear`: removes all files in the package folder
-  - `add`: copies the file at the passed absolute path to the package folder adding a prefix in the format of `000_` which increments for each file added.
+##### `.isValid()` #####
+Returns a `Promise` that resolves to true if the folder can be written to and read from
 
 
+##### `#clear()` #####
+Clears the folder  
+Returns a `Promise`
+
+##### `#add(filePath)` #####
+Copies the file located at the absolute path into the folder  
+Returns a `Promise`
+
+### Example ###
 ```
-var packageFolder = require('chuck-steve-package-folder'):
+const PackageFolder = require('chuck-steve-package-folder');
+let packageFolder = new PackageFolder('some folder path');
 
-var onLoad = function(err, folder) {
-  if(err) {
-    console.error(err):
-    return;
-  }
-
-  folder.clear();
-  folder.add(somePathToAFile):
-  folder.add(somePathToAnotherFile):
+packageFolder
+  .isValid()
+  .then((isValid) => {
+    if(isValid) {
+      return packageFolder
+        .clear
+        .then(() => return packageFolder.add('some file path'));
+    }
+  })
+  .catch(console.error);
 }
-
-packageFolder('./packages', onLoad);
 ```
-
-### Possible Errors ###
-An error may be returned for the following cases
-
-1. The folder couldn't be found or created

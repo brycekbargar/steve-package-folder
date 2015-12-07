@@ -1,9 +1,16 @@
-module.exports = function(folderPath, cb) {
-  require('fs').mkdir(folderPath, (err) => {
-    if(err && err.code !== 'EEXIST') {
-      cb(err);
-      return;
-    }
-    cb(null);
-  });
+'use strict';
+
+const Promise = require('bluebird');
+const fs = require('fs');
+
+module.exports = class PackageFolder {
+  constructor(folderPath) {
+    this.folderPath = folderPath;
+  }
+
+  isValid() {
+    return Promise
+      .promisify(fs.stat)(this.folderPath)
+      .catch((err) =>  err.code === 'EEXIST');
+  }
 };

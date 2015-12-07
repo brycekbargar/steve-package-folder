@@ -2,52 +2,46 @@
 
 const proxyquire = require('proxyquire').noCallThru();
 const sinon = require('sinon');
-const spy = sinon.spy;
+require('sinon-as-promised')(require('bluebird'));
 const stub = sinon.stub;
-const expect = require('chai').use(require('sinon-chai')).expect;
+const expect = require('chai')
+  .use(require('sinon-chai'))
+  .use(require('chai-as-promised'))
+  .expect;
 
-const proxyquireStubs = { };
+const proxyquireStubs = { fs: { stat: 'stat' } };
 
-const _ = '';
+const _ = 'A SUPER COOL FOLDER';
 
-beforeEach('Setup Spies', () => {
-  this.callbackSpy = spy();
-  this.mkdirStub = stub();
-  proxyquireStubs['fs'] = { mkdir: this.mkdirStub };
-});
-beforeEach('Setup File', () => this.folder = proxyquire('./../index.js', proxyquireStubs));
-describe('when loading the folder', () => {
-  it('expect the folder to be passed', () => {
-    let folderPath = 'THE BEST FOLDER EVER! PROBABLY CONTAINS BANANA PANCAKES!!!';
-    this.folder(folderPath, () => {});
-    expect(this.mkdirStub).to.have.been.calledOnce;
-    expect(this.mkdirStub).to.have.been.calledWith(folderPath);
+describe('For the Steve Package Folder', () => {
+  beforeEach('Setup Spies', () => {
+    this.promisifyStub = stub();
+    proxyquireStubs['bluebird'] = { promisify: this.promisifyStub };
   });
-  describe('and it fails', () => {
-    beforeEach('Setup Spies', () => {
-      this.error = {};
-      this.mkdirStub.callsArgWith(1, this.error);
-    });
-    it('expect no error if it exists', () => {
-      this.error.code = 'EEXIST';
-      this.folder(_, this.callbackSpy);
-      expect(this.callbackSpy).to.have.been.calledOnce;
-      expect(this.callbackSpy).to.have.been.calledWith(null);
-    });
-    it('expect an error for any other failure', () => {
-      this.folder(_, this.callbackSpy);
-      expect(this.callbackSpy).to.have.been.calledOnce;
-      expect(this.callbackSpy).to.have.been.calledWith(this.error);
-    });
+  beforeEach('Setup Package Folder', () => {
+    let PackageFolder = proxyquire('./../index.js', proxyquireStubs);
+    this.packageFolder = new PackageFolder(_);
   });
-  describe('and it succeeds', () => {
+  describe('when #isValid() is called', () => {
     beforeEach('Setup Spies', () => {
-      this.mkdirStub.callsArgWith(1, null);
+      this.statStub = stub();
+      this.statStub.resolves();
+      this.promisifyStub.withArgs('stat').returns(this.statStub);
     });
-    it('expect no error', () => {
-      this.folder(_, this.callbackSpy);
-      expect(this.callbackSpy).to.have.been.calledOnce;
-      expect(this.callbackSpy).to.have.been.calledWith(null);
+    it('expect the constructor folder to be passed', () => {
+      this.packageFolder.isValid();
+      expect(this.statStub).to.have.been.calledOnce;
+      expect(this.statStub).to.have.been.calledWith(_);
+    });
+    it('and the folder is missing expect it to be ok', () => {
+      this.statStub.rejects({ code: 'EEXIST' });
+      let isValid = this.packageFolder.isValid();
+      expect(isValid).to.eventually.be.ok;
+    });
+    it('and it fails for any other reason expect it to not be ok', () => {
+      this.statStub.rejects(new Error());
+      let isValid = this.packageFolder.isValid();
+      expect(isValid).to.eventually.not.be.ok;
     });
   });
 });
