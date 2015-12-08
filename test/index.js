@@ -12,10 +12,11 @@ const expect = require('chai')
 
 const proxyquireStubs = {
   bluebird: Promise,
-  'fs-extra': 'fs-extra'
+  'fs-extra': 'fs-extra',
+  path: require('path')
 };
 
-const _ = 'A SUPER COOL FOLDER';
+const _ = '/the/coolest/folder/ever/';
 
 describe('For the Steve Package Folder', () => {
   beforeEach('Setup Spies', () => {
@@ -23,7 +24,8 @@ describe('For the Steve Package Folder', () => {
       .withArgs('fs-extra')
       .returns(this.fse = {
         ensureDir: this.ensureDirStub = stub(),
-        remove: this.removeStub = stub()
+        remove: this.removeStub = stub(),
+        copy: this.copyStub = stub()
       });
   });
   afterEach('Teardown Spies', () => {
@@ -61,20 +63,35 @@ describe('For the Steve Package Folder', () => {
         expect(this.ensureDirStub).to.have.been.calledWith(_);
       });
     });
-    describe('expect it to return an error', () => {
-      it('when deletion fails', () =>{
+    describe('expect it to return an error when', () => {
+      it('deletion fails', () =>{
         let error = new Error();
         this.removeStub.rejects(error);
         let clear = this.packageFolder.clear();
         expect(clear).to.be.rejectedWith(error);
       });
-      it('when creation fails', () => {
+      it('creation fails', () => {
         let error = new Error();
         this.removeStub.resolves();
         this.ensureDirStub.rejects(error);
         let clear = this.packageFolder.clear();
         expect(clear).to.be.rejectedWith(error);
       });
+    });
+  });
+  describe('when #add() is called', () =>{
+    it('expect the file to be copied with the prefix', () => {
+      this.copyStub.resolves();
+      let filePath = '/a/file/about/pancakes.ck';
+      let add = this.packageFolder.add(56, filePath);
+      expect(add).to.be.fulfilled;
+      expect(this.copyStub).to.have.been.calledWith(filePath, _ + '056_pancakes.ck' );
+    });
+    it('expect it to return any errors', () => {
+      let error = new Error();
+      this.copyStub.rejects(error);
+      let add = this.packageFolder.add();
+      expect(add).to.be.rejectedWith(error);
     });
   });
 });
