@@ -28,10 +28,9 @@ packageFolder
   .then((isValid) => {
     if(isValid) {
       return packageFolder
-        .clear
+        .clear()
         .then(() => packageFolder.add(1, 'some file path'));
     }
   })
   .catch(console.error);
-}
 ```

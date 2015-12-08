@@ -23,9 +23,9 @@ describe('For the Steve Package Folder', () => {
     stub(Promise, 'promisifyAll')
       .withArgs('fs-extra')
       .returns(this.fse = {
-        ensureDir: this.ensureDirStub = stub(),
-        remove: this.removeStub = stub(),
-        copy: this.copyStub = stub()
+        ensureDirAsync: this.ensureDirStub = stub(),
+        removeAsync: this.removeStub = stub(),
+        copyAsync: this.copyStub = stub()
       });
   });
   afterEach('Teardown Spies', () => {

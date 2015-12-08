@@ -11,21 +11,21 @@ class PackageFolder {
 
   isValid() {
     return fsep
-      .ensureDir(this.folderPath)
+      .ensureDirAsync(this.folderPath)
       .then(() => true)
       .catch(() => false);
   }
 
   clear() {
     return fsep
-      .remove(this.folderPath)
-      .then(() => fsep.ensureDir(this.folderPath));
+      .removeAsync(this.folderPath)
+      .then(() => fsep.ensureDirAsync(this.folderPath));
   }
 
   add(index, filePath) {
     let fileName = ('000' + index + '_').slice(-4) + path.basename(filePath);
     return fsep
-      .copy(filePath, path.join(this.folderPath, fileName));
+      .copyAsync(filePath, path.join(this.folderPath, fileName));
   }
 }
 
