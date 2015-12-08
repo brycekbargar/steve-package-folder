@@ -12,25 +12,24 @@ const expect = require('chai')
 
 const proxyquireStubs = {
   bluebird: Promise,
-  fs: {
-    stat: 'stat',
-    rmdir: 'rmdir',
-    mkdir: 'mkdir'
-  }
+  'fs-extra': 'fs-extra'
 };
 
 const _ = 'A SUPER COOL FOLDER';
 
 describe('For the Steve Package Folder', () => {
   beforeEach('Setup Spies', () => {
-    this.promisifyStub = stub(Promise, 'promisify');
-    this.promisifyStub.withArgs('stat').returns(this.statStub = stub());
-    this.promisifyStub.withArgs('rmdir').returns(this.rmdirStub = stub());
-    this.promisifyStub.withArgs('mkdir').returns(this.mkdirStub = stub());
-    this.statStub.resolves({ isDirectory : (this.isDirectoryStub = stub()) });
+    stub(Promise, 'promisifyAll')
+      .withArgs('fs-extra')
+      .returns(this.fse = {
+        stat: this.statStub = stub(),
+        rmdir: this.rmdirStub = stub(),
+        mkdir: this.mkdirStub = stub()
+      });
+    this.statStub.resolves({ isDirectory : this.isDirectoryStub = stub() });
   });
   afterEach('Teardown Spies', () => {
-    this.promisifyStub.restore();
+    Promise.promisifyAll.restore();
   });
   beforeEach('Setup Package Folder', () => {
     let PackageFolder = proxyquire('./../index.js', proxyquireStubs);
@@ -79,6 +78,13 @@ describe('For the Steve Package Folder', () => {
         expect(this.mkdirStub).to.have.been.calledWith(_);
       });
     });
+    it('expect it to return any error when creation fails', () => {
+      let error = new Error();
+      this.rmdirStub.resolves();
+      this.mkdirStub.rejects(error);
+      let clear = this.packageFolder.clear();
+      expect(clear).to.be.rejectedWith(error);
+    });
     describe('and deletion fails', () => {
       it('expect it to be created if it doesn\'t exist', () => {
         this.rmdirStub.rejects({ code: 'ENOENT' });
@@ -93,13 +99,6 @@ describe('For the Steve Package Folder', () => {
         expect(clear).to.be.rejectedWith(error);
         return clear.catch(() => expect(this.mkdirStub).to.not.have.been.called);
       });
-    });
-    it('expect it to return any error when creation fails', () => {
-      let error = new Error();
-      this.rmdirStub.resolves();
-      this.mkdirStub.rejects(error);
-      let clear = this.packageFolder.clear();
-      expect(clear).to.be.rejectedWith(error);
     });
   });
 });
