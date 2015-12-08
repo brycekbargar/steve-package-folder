@@ -11,9 +11,9 @@ class PackageFolder {
 
   isValid() {
     return fsep
-      .stat(this.folderPath)
-      .then(s => s.isDirectory())
-      .catch(err =>  err.code === FILE_MISSING);
+      .ensureDir(this.folderPath)
+      .then(() => true)
+      .catch(() => false);
   }
 
   clear() {

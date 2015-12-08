@@ -22,11 +22,10 @@ describe('For the Steve Package Folder', () => {
     stub(Promise, 'promisifyAll')
       .withArgs('fs-extra')
       .returns(this.fse = {
-        stat: this.statStub = stub(),
+        ensureDir: this.ensureDirStub = stub(),
         rmdir: this.rmdirStub = stub(),
         mkdir: this.mkdirStub = stub()
       });
-    this.statStub.resolves({ isDirectory : this.isDirectoryStub = stub() });
   });
   afterEach('Teardown Spies', () => {
     Promise.promisifyAll.restore();
@@ -37,34 +36,19 @@ describe('For the Steve Package Folder', () => {
   });
   describe('when #isValid() is called', () => {
     it('expect the constructor folder to be tested', () => {
+      this.ensureDirStub.resolves();
       this.packageFolder.isValid();
-      expect(this.statStub).to.have.been.calledOnce;
-      expect(this.statStub).to.have.been.calledWith(_);
+      expect(this.ensureDirStub).to.have.been.calledWith(_);
     });
-    describe('expect it to be valid if', () => {
-      it('the folder is missing', () => {
-        this.statStub.rejects({ code: 'ENOENT' });
-        let isValid = this.packageFolder.isValid();
-        expect(isValid).to.eventually.be.ok;
-      });
-      // I'm not testing the mode because that seems hard
-      it('it is a folder', () => {
-        this.isDirectoryStub.returns(true);
-        let isValid = this.packageFolder.isValid();
-        expect(isValid).to.eventually.be.ok;
-      });
+    it('expect it to be valid if it exists', () => {
+      this.ensureDirStub.resolves();
+      let isValid = this.packageFolder.isValid();
+      expect(isValid).to.eventually.be.ok;
     });
-    describe('expect it to not be valid if', () => {
-      it('it fails for any other reason', () => {
-        this.statStub.rejects(new Error());
-        let isValid = this.packageFolder.isValid();
-        expect(isValid).to.eventually.not.be.ok;
-      });
-      it('it is not a folder', () => {
-        this.isDirectoryStub.returns(false);
-        let isValid = this.packageFolder.isValid();
-        expect(isValid).to.eventually.not.be.ok;
-      });
+    it('expect it to not be valid if there is any error', () => {
+      this.ensureDirStub.rejects(new Error());
+      let isValid = this.packageFolder.isValid();
+      expect(isValid).to.eventually.not.be.ok;
     });
   });
   describe('when #clear() is called', () => {
