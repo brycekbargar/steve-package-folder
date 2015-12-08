@@ -14,7 +14,8 @@ const proxyquireStubs = {
   bluebird: Promise,
   fs: {
     stat: 'stat',
-    rmdir:  'rmdir'
+    rmdir: 'rmdir',
+    mkdir: 'mkdir'
   }
 };
 
@@ -25,6 +26,7 @@ describe('For the Steve Package Folder', () => {
     this.promisifyStub = stub(Promise, 'promisify');
     this.promisifyStub.withArgs('stat').returns(this.statStub = stub());
     this.promisifyStub.withArgs('rmdir').returns(this.rmdirStub = stub());
+    this.promisifyStub.withArgs('mkdir').returns(this.mkdirStub = stub());
     this.statStub.resolves({ isDirectory : (this.isDirectoryStub = stub()) });
   });
   afterEach('Teardown Spies', () => {
@@ -67,22 +69,35 @@ describe('For the Steve Package Folder', () => {
     });
   });
   describe('when #clear() is called', () => {
-    it('expect it to be deleted', () => {
+    it('expect it to be deleted and created', () => {
       this.rmdirStub.resolves();
+      this.mkdirStub.resolves();
       let clear = this.packageFolder.clear();
       expect(clear).to.be.fulfilled;
+      return clear.then(() => {
+        expect(this.rmdirStub).to.have.been.calledWith(_);
+        expect(this.mkdirStub).to.have.been.calledWith(_);
+      });
     });
     describe('and deletion fails', () => {
-      it('expect nothing if it doesn\'t exist', () => {
+      it('expect it to be created it doesn\'t exist', () => {
         this.rmdirStub.rejects({ code: 'ENOENT' });
         let clear = this.packageFolder.clear();
         expect(clear).to.be.fulfilled;
+        return clear.then(() => {
+          expect(this.rmdirStub).to.have.been.calledWith(_);
+          expect(this.mkdirStub).to.have.been.calledWith(_);
+        });
       });
-      it('expect any other error to be returned', () =>{
+      it('expect any other error to be returned and it not to be created', () =>{
         let error = new Error();
         this.rmdirStub.rejects(error);
         let clear = this.packageFolder.clear();
         expect(clear).to.be.rejectedWith(error);
+        return clear.catch(() => {
+          expect(this.rmdirStub).to.have.been.calledWith(_);
+          expect(this.mkdirStub).to.not.have.been.called;
+        });
       });
     });
   });

@@ -10,13 +10,12 @@ Takes a single string containing the absolute folder path
 ##### `.isValid()` #####
 Returns a `Promise` that resolves to true if the folder can be written to and read from
 
-
 ##### `#clear()` #####
 Clears the folder  
 Returns a `Promise`
 
-##### `#add(filePath)` #####
-Copies the file located at the absolute path into the folder  
+##### `#add(index, filePath)` #####
+Copies the file located at the absolute path into the folder prefixed with the index in `000_` format
 Returns a `Promise`
 
 ### Example ###
@@ -30,7 +29,7 @@ packageFolder
     if(isValid) {
       return packageFolder
         .clear
-        .then(() => return packageFolder.add('some file path'));
+        .then(() => packageFolder.add(1, 'some file path'));
     }
   })
   .catch(console.error);

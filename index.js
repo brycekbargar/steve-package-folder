@@ -20,12 +20,12 @@ class PackageFolder {
     return Promise
       .promisify(fs.rmdir)(this.folderPath)
       .catch(err => {
-        console.log(err);
         if(err.code === FILE_MISSING){
           return Promise.resolve();
         }
         throw err;
-      });
+      })
+      .then(() => Promise.promisify(fs.mkdir)(this.folderPath));
   }
 }
 
