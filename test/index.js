@@ -80,25 +80,26 @@ describe('For the Steve Package Folder', () => {
       });
     });
     describe('and deletion fails', () => {
-      it('expect it to be created it doesn\'t exist', () => {
+      it('expect it to be created if it doesn\'t exist', () => {
         this.rmdirStub.rejects({ code: 'ENOENT' });
         let clear = this.packageFolder.clear();
         expect(clear).to.be.fulfilled;
-        return clear.then(() => {
-          expect(this.rmdirStub).to.have.been.calledWith(_);
-          expect(this.mkdirStub).to.have.been.calledWith(_);
-        });
+        return clear.then(() => expect(this.mkdirStub).to.have.been.calledWith(_));
       });
       it('expect any other error to be returned and it not to be created', () =>{
         let error = new Error();
         this.rmdirStub.rejects(error);
         let clear = this.packageFolder.clear();
         expect(clear).to.be.rejectedWith(error);
-        return clear.catch(() => {
-          expect(this.rmdirStub).to.have.been.calledWith(_);
-          expect(this.mkdirStub).to.not.have.been.called;
-        });
+        return clear.catch(() => expect(this.mkdirStub).to.not.have.been.called);
       });
+    });
+    it('expect it to return any error when creation fails', () => {
+      let error = new Error();
+      this.rmdirStub.resolves();
+      this.mkdirStub.rejects(error);
+      let clear = this.packageFolder.clear();
+      expect(clear).to.be.rejectedWith(error);
     });
   });
 });
