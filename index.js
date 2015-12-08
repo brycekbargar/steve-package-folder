@@ -2,7 +2,6 @@
 
 const Promise = require('bluebird');
 const fsep = Promise.promisifyAll(require('fs-extra'));
-const FILE_MISSING = 'ENOENT';
 
 class PackageFolder {
   constructor(folderPath) {
@@ -18,14 +17,8 @@ class PackageFolder {
 
   clear() {
     return fsep
-      .rmdir(this.folderPath)
-      .catch(err => {
-        if(err.code === FILE_MISSING){
-          return Promise.resolve();
-        }
-        throw err;
-      })
-      .then(() => fsep.mkdir(this.folderPath));
+      .remove(this.folderPath)
+      .then(() => fsep.ensureDir(this.folderPath));
   }
 }
 

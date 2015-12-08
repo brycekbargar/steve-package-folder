@@ -23,8 +23,7 @@ describe('For the Steve Package Folder', () => {
       .withArgs('fs-extra')
       .returns(this.fse = {
         ensureDir: this.ensureDirStub = stub(),
-        rmdir: this.rmdirStub = stub(),
-        mkdir: this.mkdirStub = stub()
+        remove: this.removeStub = stub()
       });
   });
   afterEach('Teardown Spies', () => {
@@ -53,35 +52,28 @@ describe('For the Steve Package Folder', () => {
   });
   describe('when #clear() is called', () => {
     it('expect it to be deleted and created', () => {
-      this.rmdirStub.resolves();
-      this.mkdirStub.resolves();
+      this.removeStub.resolves();
+      this.ensureDirStub.resolves();
       let clear = this.packageFolder.clear();
       expect(clear).to.be.fulfilled;
       return clear.then(() => {
-        expect(this.rmdirStub).to.have.been.calledWith(_);
-        expect(this.mkdirStub).to.have.been.calledWith(_);
+        expect(this.removeStub).to.have.been.calledWith(_);
+        expect(this.ensureDirStub).to.have.been.calledWith(_);
       });
     });
-    it('expect it to return any error when creation fails', () => {
-      let error = new Error();
-      this.rmdirStub.resolves();
-      this.mkdirStub.rejects(error);
-      let clear = this.packageFolder.clear();
-      expect(clear).to.be.rejectedWith(error);
-    });
-    describe('and deletion fails', () => {
-      it('expect it to be created if it doesn\'t exist', () => {
-        this.rmdirStub.rejects({ code: 'ENOENT' });
-        let clear = this.packageFolder.clear();
-        expect(clear).to.be.fulfilled;
-        return clear.then(() => expect(this.mkdirStub).to.have.been.calledWith(_));
-      });
-      it('expect any other error to be returned and it not to be created', () =>{
+    describe('expect it to return an error', () => {
+      it('when deletion fails', () =>{
         let error = new Error();
-        this.rmdirStub.rejects(error);
+        this.removeStub.rejects(error);
         let clear = this.packageFolder.clear();
         expect(clear).to.be.rejectedWith(error);
-        return clear.catch(() => expect(this.mkdirStub).to.not.have.been.called);
+      });
+      it('when creation fails', () => {
+        let error = new Error();
+        this.removeStub.resolves();
+        this.ensureDirStub.rejects(error);
+        let clear = this.packageFolder.clear();
+        expect(clear).to.be.rejectedWith(error);
       });
     });
   });
