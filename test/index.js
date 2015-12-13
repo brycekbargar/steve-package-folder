@@ -22,7 +22,7 @@ describe('For the Steve Package Folder', () => {
   beforeEach('Setup Spies', () => {
     stub(Promise, 'promisifyAll')
       .withArgs('fs-extra')
-      .returns(this.fse = {
+      .returns({
         ensureDirAsync: this.ensureDirStub = stub(),
         removeAsync: this.removeStub = stub(),
         copyAsync: this.copyStub = stub()

@@ -7,25 +7,25 @@ const fsep = Promise.promisifyAll(require('fs-extra'));
 class PackageFolder {
   constructor(folderPath) {
     this.folderPath = folderPath;
-  }
 
-  isValid() {
-    return fsep
-      .ensureDirAsync(this.folderPath)
-      .then(() => true)
-      .catch(() => false);
-  }
+    this.isValid = () => {
+      return fsep
+        .ensureDirAsync(this.folderPath)
+        .then(() => true)
+        .catch(() => false);
+    };
 
-  clear() {
-    return fsep
-      .removeAsync(this.folderPath)
-      .then(() => fsep.ensureDirAsync(this.folderPath));
-  }
+    this.clear = () => {
+      return fsep
+        .removeAsync(this.folderPath)
+        .then(() => fsep.ensureDirAsync(this.folderPath));
+    };
 
-  add(index, filePath) {
-    let fileName = ('000' + index + '_').slice(-4) + path.basename(filePath);
-    return fsep
-      .copyAsync(filePath, path.join(this.folderPath, fileName));
+    this.add = (index, filePath) => {
+      let fileName = ('000' + index + '_').slice(-4) + path.basename(filePath);
+      return fsep
+        .copyAsync(filePath, path.join(this.folderPath, fileName));
+    };
   }
 }
 
