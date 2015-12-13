@@ -14,8 +14,8 @@ Returns a `Promise` that resolves to true if the folder can be written to and re
 Clears the folder  
 Returns a `Promise`
 
-##### `#add(index, filePath)` #####
-Copies the file located at the absolute path into the folder prefixed with the index in `000_` format
+##### `#add(filePath, index)` #####
+Copies the file located at the absolute path into the folder prefixed with the index in `000_` format  
 Returns a `Promise`
 
 ### Example ###
@@ -29,7 +29,7 @@ packageFolder
     if(isValid) {
       return packageFolder
         .clear()
-        .then(() => packageFolder.add(1, 'some file path'));
+        .then(() => packageFolder.add('some file path', 1));
     }
   })
   .catch(console.error);

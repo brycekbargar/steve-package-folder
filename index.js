@@ -21,7 +21,7 @@ class PackageFolder {
         .then(() => fsep.ensureDirAsync(this.folderPath));
     };
 
-    this.add = (index, filePath) => {
+    this.add = (filePath, index) => {
       let fileName = ('000' + index + '_').slice(-4) + path.basename(filePath);
       return fsep
         .copyAsync(filePath, path.join(this.folderPath, fileName));

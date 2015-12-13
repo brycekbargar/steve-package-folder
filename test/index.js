@@ -83,7 +83,7 @@ describe('For the Steve Package Folder', () => {
     it('expect the file to be copied with the prefix', () => {
       this.copyStub.resolves();
       let filePath = '/a/file/about/pancakes.ck';
-      let add = this.packageFolder.add(56, filePath);
+      let add = this.packageFolder.add(filePath, 56);
       expect(add).to.be.fulfilled;
       expect(this.copyStub).to.have.been.calledWith(filePath, _ + '056_pancakes.ck' );
     });

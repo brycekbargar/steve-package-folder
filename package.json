@@ -1,6 +1,6 @@
 {
   "name": "chuck-steve-package-folder",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "A wrapper for performing actions on the package folder in [`steve`](https://www.github.com/brycekbargar/steve) packages.",
   "main": "index.js",
   "scripts": {
